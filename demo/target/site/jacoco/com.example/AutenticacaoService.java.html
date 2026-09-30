@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutenticacaoService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demo</a> &gt; <a href="index.source.html" class="el_package">com.example</a> &gt; <span class="el_source">AutenticacaoService.java</span></div><h1>AutenticacaoService.java</h1><pre class="source lang-java linenums">
+package com.example;
+
+import java.util.HashMap;
+import java.util.Map;
+
+<span class="fc" id="L7">public class AutenticacaoService {</span>
+
+<span class="fc" id="L9">    private final Map&lt;String, Usuario&gt; usuarios = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L10">    private final ValidacaoSenhaService validadorSenha =</span>
+            new ValidacaoSenhaService();
+
+    public Usuario cadastrarUsuario(String nome, String email,
+                                     String senha, String nivel) {
+
+<span class="pc bpc" id="L16" title="2 of 6 branches missed.">        if (nome == null || nome.isBlank()</span>
+<span class="pc bpc" id="L17" title="2 of 4 branches missed.">                || email == null || email.isBlank()</span>
+<span class="pc bpc" id="L18" title="2 of 4 branches missed.">                || senha == null || senha.isBlank()</span>
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">                || nivel == null || nivel.isBlank()) {</span>
+<span class="fc" id="L20">            throw new IllegalArgumentException(</span>
+                    &quot;Todos os campos são obrigatórios.&quot;);
+        }
+
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        if (!email.matches(&quot;^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$&quot;)) {</span>
+<span class="fc" id="L25">            throw new IllegalArgumentException(</span>
+                    &quot;E-mail inválido.&quot;);
+        }
+
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if (!validadorSenha.validarSenha(senha)) {</span>
+<span class="fc" id="L30">            throw new IllegalArgumentException(</span>
+                    &quot;A senha não atende aos requisitos.&quot;);
+        }
+
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (!nivel.equals(&quot;ADMIN&quot;)</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">                &amp;&amp; !nivel.equals(&quot;GERENTE&quot;)</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">                &amp;&amp; !nivel.equals(&quot;CLIENTE&quot;)) {</span>
+<span class="fc" id="L37">            throw new IllegalArgumentException(</span>
+                    &quot;Nível de acesso inválido.&quot;);
+        }
+
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (usuarios.containsKey(email)) {</span>
+<span class="fc" id="L42">            throw new IllegalArgumentException(</span>
+                    &quot;E-mail já cadastrado.&quot;);
+        }
+
+<span class="fc" id="L46">        Usuario usuario = new Usuario(nome, email, senha, nivel);</span>
+<span class="fc" id="L47">        usuarios.put(email, usuario);</span>
+
+<span class="fc" id="L49">        return usuario;</span>
+    }
+
+    public Usuario autenticar(String email, String senha) {
+
+<span class="pc bpc" id="L54" title="3 of 6 branches missed.">        if (email == null || email.isBlank()</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">                || senha == null || senha.isBlank()) {</span>
+<span class="nc" id="L56">            throw new IllegalArgumentException(</span>
+                    &quot;E-mail e senha são obrigatórios.&quot;);
+        }
+
+<span class="fc" id="L60">        Usuario usuario = usuarios.get(email);</span>
+
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (usuario == null) {</span>
+<span class="nc" id="L63">            throw new IllegalArgumentException(</span>
+                    &quot;Usuário não encontrado.&quot;);
+        }
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (usuario.isBloqueado()) {</span>
+<span class="fc" id="L68">            throw new IllegalStateException(</span>
+                    &quot;Usuário bloqueado após três tentativas.&quot;);
+        }
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        if (!usuario.getSenha().equals(senha)) {</span>
+<span class="fc" id="L73">            usuario.incrementarTentativas();</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">            if (usuario.isBloqueado()) {</span>
+<span class="fc" id="L76">                throw new IllegalStateException(</span>
+                        &quot;Usuário bloqueado após três tentativas.&quot;);
+            }
+
+<span class="fc" id="L80">            throw new IllegalArgumentException(</span>
+                    &quot;Senha incorreta. Tentativas: &quot;
+<span class="fc" id="L82">                    + usuario.getTentativasInvalidas());</span>
+        }
+
+<span class="fc" id="L85">        usuario.zerarTentativas();</span>
+<span class="fc" id="L86">        return usuario;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
